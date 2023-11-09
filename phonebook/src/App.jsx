@@ -36,6 +36,18 @@ const Person = ({person, onDeleteClick}) => {
 }
 
 
+const Notification = ({ message, type }) => {
+  const className = type
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className={className}>
+      {message}
+    </div>
+  )
+}
 // const Persons = ({personsShown}) => {
 //   return (
 //     <div>
@@ -51,6 +63,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [confirmationMessage, setConfirmationMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
 
   useEffect(() => {
@@ -72,7 +86,10 @@ const App = () => {
       personService
       .create(personObject)
       .then(response => {
-        console.log(response)
+        setConfirmationMessage(`${response.data.name} was successfully added to the phonebook`)
+        setTimeout(() => {
+          setConfirmationMessage(null)
+        }, 5000);
         setPersons(persons.concat(response.data))
         setFilter('')
         setNewName('')
@@ -96,6 +113,18 @@ const App = () => {
     .update(id, updatedPerson)
     .then(response => {
       setPersons(persons.map(p => p.id !== id ? p : response.data))
+      setConfirmationMessage(`${response.data.name}'s number was successfully updated to ${response.data.number}`)
+        setTimeout(() => {
+          setConfirmationMessage(null)
+        }, 5000);
+    })
+    .catch(error => {
+      console.log(error)
+      setErrorMessage(`The information of ${person.name} is no longer in the phonebook`);
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+      personService.getAll().then(response => setPersons(response.data))
     })
   }
 
@@ -131,6 +160,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={confirmationMessage} type={'confirmation'} />
+      <Notification message={errorMessage} type={'error'} />
       <Filter filter={filter} handleFilterChange={handleFilterChange}/>
       <h2>Add new person</h2>
       <PersonForm addPerson={addPerson} newName={newName} handleNameChange={handleNameChange}

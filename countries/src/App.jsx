@@ -24,10 +24,16 @@ const Country = ({country, weather}) => {
       }
       </ul>
       <img src={flag} alt={flagAlt}></img>
-      <h3>Weather in {capital}</h3>
-      <p>Temperature: {weather.current.temp_c} Celsius</p>
-      <img src={weather.current.condition.icon}></img>
-      <p>Wind {weather.current.wind_kph} km/hr</p>
+      {weather ? (
+        <div>
+        <h3>Weather in {capital}</h3>
+        <p>Temperature: {weather.current.temp_c} Celsius</p>
+        <img src={weather.current.condition.icon}></img>
+        <p>Wind {weather.current.wind_kph} km/hr</p>
+        </div>
+      ) : <></> }
+
+
 
     </div>
   )
@@ -58,30 +64,56 @@ function App() {
       .then(response => {
         setCountry(response.data)
         console.log(response.data)
+        // const options = {
+        //   method: 'GET',
+        //   url: 'https://weatherapi-com.p.rapidapi.com/current.json',
+        //   params: {q: response.data.capital[0]},
+        //   headers: {
+        //     'X-RapidAPI-Key': import.meta.env.VITE_RAPID_KEY,
+        //     'X-RapidAPI-Host': import.meta.env.VITE_RAPID_HOST
+        //   }
+        // };
 
-
-        const options = {
-          method: 'GET',
-          url: `https://weatherapi-com.p.rapidapi.com/current.json?q=${response.data.capital[0]}`,
-          params: {q: '53.1,-0.13'},
-          headers: {
-            'X-RapidAPI-Key': import.meta.env.VITE_RAPID_KEY,
-            'X-RapidAPI-Host': import.meta.env.VITE_RAPID_HOST
-          }
-        };
-
-        return axios.request(options)
-        .then(response => {
-          console.log(response.data)
-          setWeather(response.data)
-        })
-        .catch(error => console.log(error))
+        // return axios.request(options)
+        // .then(response => {
+        //   console.log(response.data);
+        //   setWeather(response.data);
+        // })
+        // .catch(error => console.log(error))
       })
 
     } else {
       setCountry(null)
+      setWeather(null)
     }
   }, [shownCountries])
+
+
+  useEffect(() => {
+    if (!country) {
+      return
+    }
+
+    const capital = country.capital[0]
+    console.log(`Capital: ${capital}`)
+    const options = {
+      method: 'GET',
+      url: `https://weatherapi-com.p.rapidapi.com/current.json?q=${capital}`,
+      // params: {q: capital},
+      headers: {
+        'X-RapidAPI-Key': import.meta.env.VITE_RAPID_KEY,
+        'X-RapidAPI-Host': import.meta.env.VITE_RAPID_HOST
+      }
+    };
+
+
+    axios.request(options)
+    .then(response => {
+      console.log(response.data);
+      setWeather(response.data);
+    })
+
+  }, [country])
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
@@ -90,7 +122,7 @@ function App() {
 
   const handleShowClick = (name) => {
     setFilter(name)
-    setShownCountries(countries.filter(c => c.toLowerCase().includes(filter.toLowerCase())));
+    setShownCountries([countries.find(c => c.toLowerCase() === name.toLowerCase())]);
   }
 
 

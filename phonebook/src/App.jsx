@@ -95,6 +95,13 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       })
+      .catch(error => {
+        console.log(error.response.data.error)
+        setErrorMessage(error.response.data.error);
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
 
     } else {
       const person = persons.find(p => p.name === newName)
@@ -119,8 +126,8 @@ const App = () => {
         }, 5000);
     })
     .catch(error => {
-      console.log(error)
-      setErrorMessage(`The information of ${person.name} is no longer in the phonebook`);
+      console.log(error.response.data.error)
+      setErrorMessage(error.response.data.error);
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
